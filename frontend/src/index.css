@@ -1,0 +1,64 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Base Layer ── */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.55;
+    color: #0F172A;
+    background-color: #E0F2FE;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    min-height: 100vh;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: 'Syne', system-ui, sans-serif;
+    font-weight: 700;
+    color: #0F172A;
+    line-height: 1.2;
+  }
+
+  /* Scrollbar — subtle, matching design */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #60A5FA;
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #0F172A;
+  }
+}
+
+/* ── Component Layer ── */
+@layer components {
+  /* Focus ring utility */
+  .focus-ring {
+    @apply outline-none ring-2 ring-tertiary/40 ring-offset-2 ring-offset-surface;
+  }
+
+  /* Transition defaults */
+  .transition-base {
+    @apply transition-all duration-200 ease-out;
+  }
+}
