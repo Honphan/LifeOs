@@ -1,4 +1,6 @@
-import { Bell, Search } from 'lucide-react';
+import { Bell, Search, LogOut } from 'lucide-react';
+import { Button } from '../../components/ui/Button';
+import { getStoredAuthUser, logout } from '../../api/auth';
 import { cn } from '../../utils/cn';
 
 interface HeaderProps {
@@ -6,6 +8,10 @@ interface HeaderProps {
 }
 
 export function Header({ sidebarCollapsed = false }: HeaderProps) {
+  const authUser = getStoredAuthUser();
+  const displayName = authUser?.name ?? authUser?.email ?? 'User';
+  const initial = displayName.charAt(0).toUpperCase();
+
   return (
     <header
       className={cn(
@@ -38,10 +44,24 @@ export function Header({ sidebarCollapsed = false }: HeaderProps) {
           <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-tertiary rounded-full" />
         </button>
 
+        {/* Logout */}
+        <Button variant="ghost" size="sm" onClick={() => logout()}>
+          <LogOut size={16} />
+        </Button>
+
         {/* Avatar */}
-        <div className="w-9 h-9 rounded-full bg-secondary/20 flex items-center justify-center">
-          <span className="text-sm font-display font-bold text-secondary">U</span>
-        </div>
+        {authUser?.picture ? (
+          <img
+            src={authUser.picture}
+            alt={displayName}
+            className="w-9 h-9 rounded-full object-cover"
+            referrerPolicy="no-referrer"
+          />
+        ) : (
+          <div className="w-9 h-9 rounded-full bg-secondary/20 flex items-center justify-center">
+            <span className="text-sm font-display font-bold text-secondary">{initial}</span>
+          </div>
+        )}
       </div>
     </header>
   );

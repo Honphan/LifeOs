@@ -32,16 +32,18 @@ export function AppRouter() {
             <Route path="/register" element={<RegisterPage />} />
           </Route>
 
+          <Route path="/" element={<Navigate to="/login" replace />} />
+
           {/* Main app routes */}
           <Route element={<MainLayout />}>
-            <Route path="/" element={<DashboardPage />} />
+            <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/tasks" element={<TasksPage />} />
             <Route path="/finance" element={<FinancePage />} />
             <Route path="/notes" element={<NotesPage />} />
           </Route>
 
-          {/* Catch-all → Dashboard */}
-          <Route path="*" element={<Navigate to="/" replace />} />
+          {/* Catch-all → Login */}
+          <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </Suspense>
     </BrowserRouter>

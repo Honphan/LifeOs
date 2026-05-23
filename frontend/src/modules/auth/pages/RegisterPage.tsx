@@ -1,31 +1,46 @@
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { Input } from '../../../components/ui/Input';
 import { Button } from '../../../components/ui/Button';
-import { Mail, Lock, Eye, EyeOff, User } from 'lucide-react';
+import { User, Eye, EyeOff } from 'lucide-react';
+import { extractAuthErrorMessage, register, startGoogleLogin } from '../../../api/auth';
 
 export function RegisterPage() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [errors, setErrors] = useState<{ name?: string; email?: string; password?: string }>({});
+  const [errors, setErrors] = useState<{ username?: string; password?: string; confirmPassword?: string }>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
   const validate = () => {
     const newErrors: typeof errors = {};
-    if (!name.trim()) newErrors.name = 'Name is required';
-    if (!email.trim()) newErrors.email = 'Email is required';
+    if (!username.trim()) newErrors.username = 'Username is required';
     if (!password.trim()) newErrors.password = 'Password is required';
     else if (password.length < 6) newErrors.password = 'Minimum 6 characters';
+    if (!confirmPassword.trim()) newErrors.confirmPassword = 'Please confirm password';
+    else if (password !== confirmPassword) newErrors.confirmPassword = 'Passwords do not match';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!validate()) return;
-    // TODO: call register API
-    console.log('Register:', { name, email, password });
+    if (!validate() || isSubmitting) return;
+
+    setSubmitError('');
+    setIsSubmitting(true);
+
+    try {
+      await register({ username, password });
+      // After successful registration, always go to login page
+      window.location.assign('/login');
+    } catch (error) {
+      setSubmitError(extractAuthErrorMessage(error));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -38,33 +53,23 @@ export function RegisterPage() {
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-        {/* Name */}
+        {submitError && (
+          <div className="rounded-md border border-red-400/30 bg-red-50 px-4 py-3 text-sm text-red-600 font-body">
+            {submitError}
+          </div>
+        )}
+
+        {/* Username */}
         <div className="relative">
           <Input
-            label="Full name"
+            label="Username"
             type="text"
-            placeholder="Your name"
-            value={name}
-            onChange={e => setName(e.target.value)}
-            error={errors.name}
+            placeholder="your-username"
+            value={username}
+            onChange={e => setUsername(e.target.value)}
+            error={errors.username}
           />
           <User
-            size={16}
-            className="absolute right-3 top-[38px] text-primary/30"
-          />
-        </div>
-
-        {/* Email */}
-        <div className="relative">
-          <Input
-            label="Email"
-            type="email"
-            placeholder="you@example.com"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            error={errors.email}
-          />
-          <Mail
             size={16}
             className="absolute right-3 top-[38px] text-primary/30"
           />
@@ -90,9 +95,29 @@ export function RegisterPage() {
           </button>
         </div>
 
+        {/* Confirm password */}
+        <div className="relative">
+          <Input
+            label="Confirm password"
+            type={showPassword ? 'text' : 'password'}
+            placeholder="••••••••"
+            value={confirmPassword}
+            onChange={e => setConfirmPassword(e.target.value)}
+            error={errors.confirmPassword}
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(s => !s)}
+            className="absolute right-3 top-[38px] text-primary/30 hover:text-primary/60 transition-base cursor-pointer"
+            aria-label={showPassword ? 'Hide password' : 'Show password'}
+          >
+            {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+          </button>
+        </div>
+
         {/* Submit — Single Tertiary CTA */}
-        <Button type="submit" className="w-full mt-2">
-          Create account
+        <Button type="submit" className="w-full mt-2" disabled={isSubmitting}>
+          {isSubmitting ? 'Creating account...' : 'Create account'}
         </Button>
       </form>
 
@@ -104,7 +129,7 @@ export function RegisterPage() {
       </div>
 
       {/* Google signup */}
-      <Button variant="secondary" className="w-full">
+      <Button type="button" variant="secondary" className="w-full" onClick={startGoogleLogin}>
         <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
           <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
           <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>

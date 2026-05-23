@@ -1,28 +1,42 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, type FormEvent } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import { Input } from '../../../components/ui/Input';
 import { Button } from '../../../components/ui/Button';
-import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { User, Eye, EyeOff } from 'lucide-react';
+import { extractAuthErrorMessage, login, startGoogleLogin } from '../../../api/auth';
 
 export function LoginPage() {
-  const [email, setEmail] = useState('');
+  const navigate = useNavigate();
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [errors, setErrors] = useState<{ username?: string; password?: string }>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
   const validate = () => {
     const newErrors: typeof errors = {};
-    if (!email.trim()) newErrors.email = 'Email is required';
+    if (!username.trim()) newErrors.username = 'Username is required';
     if (!password.trim()) newErrors.password = 'Password is required';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!validate()) return;
-    // TODO: call auth API
-    console.log('Login:', { email, password });
+    if (!validate() || isSubmitting) return;
+
+    setSubmitError('');
+    setIsSubmitting(true);
+
+    try {
+      await login({ username, password });
+      navigate('/dashboard', { replace: true });
+    } catch (error) {
+      setSubmitError(extractAuthErrorMessage(error));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -35,17 +49,23 @@ export function LoginPage() {
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-        {/* Email */}
+        {submitError && (
+          <div className="rounded-md border border-red-400/30 bg-red-50 px-4 py-3 text-sm text-red-600 font-body">
+            {submitError}
+          </div>
+        )}
+
+        {/* Username */}
         <div className="relative">
           <Input
-            label="Email"
-            type="email"
-            placeholder="you@example.com"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            error={errors.email}
+            label="Username"
+            type="text"
+            placeholder="your-username"
+            value={username}
+            onChange={e => setUsername(e.target.value)}
+            error={errors.username}
           />
-          <Mail
+          <User
             size={16}
             className="absolute right-3 top-[38px] text-primary/30"
           />
@@ -79,8 +99,8 @@ export function LoginPage() {
         </div>
 
         {/* Submit — Single Tertiary CTA */}
-        <Button type="submit" className="w-full">
-          Sign in
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
+          {isSubmitting ? 'Signing in...' : 'Sign in'}
         </Button>
       </form>
 
@@ -92,7 +112,7 @@ export function LoginPage() {
       </div>
 
       {/* Google login */}
-      <Button variant="secondary" className="w-full">
+      <Button type="button" variant="secondary" className="w-full" onClick={startGoogleLogin}>
         <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
           <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
           <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>

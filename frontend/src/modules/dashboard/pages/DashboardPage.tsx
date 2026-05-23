@@ -2,6 +2,7 @@ import { CheckSquare, Wallet, FileText, TrendingUp, Plus, ArrowRight } from 'luc
 import { StatCard } from '../components/StatCard';
 import { Card } from '../../../components/ui/Card';
 import { Button } from '../../../components/ui/Button';
+import { getStoredAuthUser } from '../../../api/auth';
 
 /* ── Mock data ── */
 const stats = [
@@ -28,12 +29,15 @@ function getGreeting() {
 
 /* ── Page ── */
 export function DashboardPage() {
+  const authUser = getStoredAuthUser();
+  const displayName = authUser?.name ?? authUser?.email ?? 'User';
+
   return (
     <div className="space-y-8 max-w-6xl">
       {/* ── Greeting ── */}
       <div>
         <h1 className="font-display text-h1 text-primary">
-          {getGreeting()}, <span className="text-tertiary">User</span>
+          {getGreeting()}, <span className="text-tertiary">{displayName}</span>
         </h1>
         <p className="text-body text-primary/50 font-body mt-1">
           Here's what's happening with your life today.

@@ -12,7 +12,7 @@ import { cn } from '../../utils/cn';
 
 /* ── Navigation items ── */
 const navItems = [
-  { to: '/',        icon: LayoutDashboard, label: 'Dashboard' },
+  { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/tasks',   icon: CheckSquare,     label: 'Tasks' },
   { to: '/finance', icon: Wallet,          label: 'Finance' },
   { to: '/notes',   icon: FileText,        label: 'Notes' },
@@ -50,7 +50,7 @@ export function Sidebar() {
           <NavLink
             key={to}
             to={to}
-            end={to === '/'}
+            end={to === '/dashboard'}
             className={({ isActive }) =>
               cn(
                 'flex items-center gap-3 px-3 py-2.5 rounded-sm',
