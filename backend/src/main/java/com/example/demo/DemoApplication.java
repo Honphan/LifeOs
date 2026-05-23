@@ -14,6 +14,11 @@ import org.springframework.data.mongodb.config.EnableMongoAuditing;
 public class DemoApplication {
 
     public static void main(String[] args) {
+        System.out.println("MYSQL_URL exists = " + (System.getenv("MYSQL_URL") != null));
+        System.out.println("SPRING_DATASOURCE_URL exists = " + (System.getenv("SPRING_DATASOURCE_URL") != null));
+        System.out.println("SPRING_DATASOURCE_DRIVER_CLASS_NAME = " + System.getenv("SPRING_DATASOURCE_DRIVER_CLASS_NAME"));
+        System.out.println("MONGODB_URI exists = " + (System.getenv("MONGODB_URI") != null));
+        System.out.println("REDIS_HOST exists = " + (System.getenv("REDIS_HOST") != null));
         SpringApplication.run(DemoApplication.class, args);
     }
 }
