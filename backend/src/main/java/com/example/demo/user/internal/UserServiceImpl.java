@@ -1,6 +1,7 @@
 package com.example.demo.user.internal;
 
-import com.example.demo.user.UserDto;
+import com.example.demo.user.dto.UserAuthDto;
+import com.example.demo.user.dto.UserDto;
 import com.example.demo.user.UserService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,5 +29,25 @@ class UserServiceImpl implements UserService {
         return userRepository.findByEmail(email)
                 .map(u -> new UserDto(u.getId(), u.getEmail(), u.getName(), u.getPicture()))
                 .orElse(null);
+    }
+
+    @Override
+    public UserAuthDto getByUsername(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng!"));
+        return new UserAuthDto(user.getId(), user.getUsername(), user.getPassword());
+    }
+
+    @Override
+    public boolean existsByUsername(String username) {
+        return userRepository.existsByUsername(username);
+    }
+
+    @Override
+    public void createUser(String username, String encodedPassword) {
+        User user = new User();
+        user.setUsername(username);
+        user.setPassword(encodedPassword);
+        userRepository.save(user);
     }
 }

@@ -1,48 +1,84 @@
 package com.example.demo.security;
 
-import com.example.demo.user.UserService;
-import com.example.demo.security.internal.JwtProvider; // Giả sử bạn để JwtProvider ở internal
+
+
+import com.example.demo.security.internal.JwtAuthenticationFilter;
+
 import org.springframework.context.annotation.Bean;
+
 import org.springframework.context.annotation.Configuration;
+
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.oauth2.core.oidc.user.OidcUser;
-import org.springframework.security.oauth2.core.user.OAuth2User;
+
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
+
 import org.springframework.security.web.SecurityFilterChain;
 
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import org.springframework.web.cors.CorsConfigurationSource;
+
+
+
 @Configuration
+
 public class SecurityConfig {
 
+
+
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http,
-                                           UserService userService,
-                                           JwtProvider jwtProvider) throws Exception {
+
+    public SecurityFilterChain filterChain(
+
+            HttpSecurity http,
+
+            JwtAuthenticationFilter jwtAuthenticationFilter,
+
+            OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler,
+
+            CorsConfigurationSource corsConfigurationSource) throws Exception {
+
         http
+
+                .cors(cors -> cors.configurationSource(corsConfigurationSource))
+
                 .csrf(AbstractHttpConfigurer::disable)
+
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login/**", "/oauth2/**").permitAll()
+
+                        .requestMatchers("/api/auth/**", "/oauth2/**", "/login/oauth2/**").permitAll()
+
                         .anyRequest().authenticated()
+
                 )
-                .oauth2Login(oauth -> oauth
-                        .successHandler((request, response, authentication) -> {
-                           OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
 
-                            assert oauth2User != null;
-                            String email = oauth2User.getAttribute("email");
-                            String name = oauth2User.getAttribute("name");
-                            String picture = oauth2User.getAttribute("picture");
-                            System.out.println("Đăng nhập thành công: " + email);
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 
-                            userService.processOAuthPostLogin(email, name, picture);
+                .oauth2Login(oauth -> oauth.successHandler(oAuth2LoginSuccessHandler));
 
-                            String token = jwtProvider.createToken(email);
 
-                            response.sendRedirect("http://localhost:3000/callback?token=" + token);
-                        })
-                );
 
         return http.build();
+
     }
+
+
+
+    @Bean
+
+    public PasswordEncoder passwordEncoder() {
+
+        return new BCryptPasswordEncoder();
+
+    }
+
 }
+

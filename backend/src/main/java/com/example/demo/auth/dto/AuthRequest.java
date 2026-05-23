@@ -1,4 +1,4 @@
 package com.example.demo.auth.dto;
 
-public record AuthRequest() {
+public record AuthRequest(String username, String password) {
 }
