@@ -7,7 +7,7 @@ interface HeaderProps {
   sidebarCollapsed?: boolean;
 }
 
-export function Header({ sidebarCollapsed = false }: HeaderProps) {
+export function Header(__props: HeaderProps) {
   const authUser = getStoredAuthUser();
   const displayName = authUser?.name ?? authUser?.email ?? 'User';
   const initial = displayName.charAt(0).toUpperCase();
