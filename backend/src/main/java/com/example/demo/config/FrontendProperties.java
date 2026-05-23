@@ -5,8 +5,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "app.frontend")
 public class FrontendProperties {
 
-    private String url = "http://localhost:5173";
-    private String oauthSuccessPath = "/dashboard";
+    /** Bind từ ${FRONTEND_URL} trong application.yaml */
+    private String url;
+    private String oauthSuccessPath;
 
     public String getUrl() {
         return url;
