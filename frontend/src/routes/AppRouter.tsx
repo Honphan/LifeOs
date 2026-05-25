@@ -8,7 +8,12 @@ const LoginPage     = lazy(() => import('../modules/auth/pages/LoginPage').then(
 const RegisterPage  = lazy(() => import('../modules/auth/pages/RegisterPage').then(m => ({ default: m.RegisterPage })));
 const DashboardPage = lazy(() => import('../modules/dashboard/pages/DashboardPage').then(m => ({ default: m.DashboardPage })));
 const TasksPage     = lazy(() => import('../modules/tasks/pages/TasksPage').then(m => ({ default: m.TasksPage })));
-const FinancePage   = lazy(() => import('../modules/finance/pages/FinancePage').then(m => ({ default: m.FinancePage })));
+const FinanceLayout        = lazy(() => import('../modules/finance/layout/FinanceLayout').then(m => ({ default: m.FinanceLayout })));
+const FinanceDashboardPage = lazy(() => import('../modules/finance/pages/FinanceDashboardPage').then(m => ({ default: m.FinanceDashboardPage })));
+const TransactionsPage     = lazy(() => import('../modules/finance/pages/TransactionsPage').then(m => ({ default: m.TransactionsPage })));
+const CategoriesPage       = lazy(() => import('../modules/finance/pages/CategoriesPage').then(m => ({ default: m.CategoriesPage })));
+const BudgetsPage          = lazy(() => import('../modules/finance/pages/BudgetsPage').then(m => ({ default: m.BudgetsPage })));
+const ReportsPage          = lazy(() => import('../modules/finance/pages/ReportsPage').then(m => ({ default: m.ReportsPage })));
 const NotesPage     = lazy(() => import('../modules/notes/pages/NotesPage').then(m => ({ default: m.NotesPage })));
 
 /* ── Loading fallback ── */
@@ -38,7 +43,13 @@ export function AppRouter() {
           <Route element={<MainLayout />}>
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/tasks" element={<TasksPage />} />
-            <Route path="/finance" element={<FinancePage />} />
+            <Route path="/finance" element={<FinanceLayout />}>
+              <Route index element={<FinanceDashboardPage />} />
+              <Route path="transactions" element={<TransactionsPage />} />
+              <Route path="categories" element={<CategoriesPage />} />
+              <Route path="budgets" element={<BudgetsPage />} />
+              <Route path="reports" element={<ReportsPage />} />
+            </Route>
             <Route path="/notes" element={<NotesPage />} />
           </Route>
 
