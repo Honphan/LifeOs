@@ -1,6 +1,6 @@
 package com.example.demo.task;
 
-import com.example.demo.task.internal.TaskStatus;
+import com.example.demo.task.enums.TaskStatus;
 
 import java.time.LocalDateTime;
 

@@ -2,7 +2,6 @@ package com.example.demo.auth;
 
 import com.example.demo.auth.dto.AuthRequest;
 import com.example.demo.auth.dto.AuthResponse;
-import com.example.demo.auth.internal.AuthServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final AuthServiceImpl authService;
+    private final AuthService authService;
 
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@RequestBody AuthRequest request) {

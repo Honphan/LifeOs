@@ -3,7 +3,9 @@ server:
 
 spring:
   config:
-    import: optional:file:.env[.properties]
+    import: optional:file:.env.${SPRING_PROFILES_ACTIVE:local}[.properties]
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local}
 
   application:
     name: ${APP_NAME}
@@ -41,11 +43,18 @@ spring:
               - email
               - profile
 
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 25MB
+
 jwt:
   secret: ${JWT_SECRET}
   expiration: ${JWT_EXPIRATION}
 
 app:
+  finance:
+    upload-dir: uploads/finance
   frontend:
     url: ${FRONTEND_URL}
     oauth-success-path: ${OAUTH_SUCCESS_PATH}

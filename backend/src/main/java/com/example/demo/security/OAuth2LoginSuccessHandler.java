@@ -1,7 +1,7 @@
 package com.example.demo.security;
 
 import com.example.demo.config.FrontendProperties;
-import com.example.demo.security.internal.JwtProvider;
+import com.example.demo.security.JwtProvider;
 import com.example.demo.user.UserService;
 import com.example.demo.user.dto.UserDto;
 import jakarta.servlet.http.HttpServletRequest;

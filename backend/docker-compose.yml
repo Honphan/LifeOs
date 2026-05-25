@@ -4,24 +4,40 @@ services:
   mysql:
     image: mysql:8.0
     container_name: lifeos-mysql
-#    environment:
-#      MYSQL_ROOT_PASSWORD: 2005
-#      MYSQL_DATABASE: life_os
+    environment:
+      MYSQL_ROOT_PASSWORD: 2005
+      MYSQL_DATABASE: life_os
     ports:
       - "3306:3306"
-#    healthcheck:
-#      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
-#      timeout: 20s
-#      retries: 10
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p2005"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    restart: unless-stopped
 
   mongodb:
     image: mongo:latest
     container_name: lifeos-mongo
     ports:
       - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    restart: unless-stopped
 
   redis:
     image: redis:alpine
     container_name: lifeos-redis
     ports:
       - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
+  mongo_data:
+  redis_data:
