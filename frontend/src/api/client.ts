@@ -1,5 +1,6 @@
 import axios, { type AxiosError } from 'axios';
 import { clearAuthSession } from './auth';
+import { readApiMessage, unwrapApiResponse } from './response';
 
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim() || '/api';
 
@@ -32,22 +33,30 @@ api.interceptors.response.use(
 );
 
 export function unwrapData<T>(payload: unknown): T {
-  if (payload && typeof payload === 'object' && 'data' in payload) {
-    return (payload as { data: T }).data;
-  }
-  return payload as T;
+  return unwrapApiResponse<T>(payload);
+}
+
+export function unwrapArrayData<T>(payload: unknown): T[] {
+  const data = unwrapApiResponse<unknown>(payload);
+  return Array.isArray(data) ? data : [];
 }
 
 export function getApiErrorMessage(error: unknown, fallback = 'Đã xảy ra lỗi') {
   if (axios.isAxiosError(error)) {
-    const data = error.response?.data;
-    if (data && typeof data === 'object') {
-      const record = data as Record<string, unknown>;
-      const message = record.message ?? record.error ?? record.detail;
-      if (typeof message === 'string' && message.trim()) return message;
-    }
+    const message = readApiMessage(error.response?.data);
+    if (message) return message;
     return error.message || fallback;
   }
   if (error instanceof Error) return error.message;
   return fallback;
+}
+
+export function isEmptyApiError(error: unknown) {
+  if (!axios.isAxiosError(error)) return false;
+
+  const status = error.response?.status;
+  if (status === 404 || status === 204) return true;
+
+  const message = readApiMessage(error.response?.data) ?? error.message ?? '';
+  return /không có|chưa có|no data|empty|not found|not exist|null/i.test(message);
 }

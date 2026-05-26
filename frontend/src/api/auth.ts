@@ -1,4 +1,5 @@
 import axios, { type AxiosError } from 'axios';
+import { readApiMessage, readApiToken, unwrapApiResponse } from './response';
 
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? '';
 const loginPath = import.meta.env.VITE_AUTH_LOGIN_PATH ?? '/auth/login';
@@ -29,6 +30,10 @@ const http = axios.create({
 const AUTH_TOKEN_KEY = 'lifeos.auth_token';
 const AUTH_USER_KEY = 'lifeos.auth_user';
 
+interface AuthResponse {
+  accessToken: string;
+}
+
 function buildApiUrl(path: string) {
   if (!apiBaseUrl) return path;
 
@@ -38,42 +43,12 @@ function buildApiUrl(path: string) {
   return new URL(normalizedPath, normalizedBaseUrl).toString();
 }
 
-function readMessage(value: unknown): string | undefined {
-  if (!value || typeof value !== 'object') return undefined;
-
-  const record = value as Record<string, unknown>;
-  const message = record.message ?? record.error ?? record.detail;
-  if (typeof message === 'string' && message.trim()) return message;
-
-  const nested = record.data;
-  if (nested && typeof nested === 'object') {
-    return readMessage(nested);
-  }
-
-  return undefined;
-}
-
-function readToken(value: unknown): string | undefined {
-  if (!value || typeof value !== 'object') return undefined;
-
-  const record = value as Record<string, unknown>;
-  const token = record.accessToken ?? record.token ?? record.jwt ?? record.idToken;
-  if (typeof token === 'string' && token.trim()) return token;
-
-  const nested = record.data;
-  if (nested && typeof nested === 'object') {
-    return readToken(nested);
-  }
-
-  return undefined;
-}
-
 export function hasAuthToken(value: unknown) {
-  return Boolean(readToken(value));
+  return Boolean(readApiToken(value));
 }
 
 function persistAuthSession(value: unknown) {
-  const token = readToken(value);
+  const token = readApiToken(value);
   if (token) {
     localStorage.setItem(AUTH_TOKEN_KEY, token);
   }
@@ -90,7 +65,7 @@ function persistAuthSession(value: unknown) {
 function getErrorMessage(error: unknown) {
   if (axios.isAxiosError(error)) {
     const axiosError = error as AxiosError<unknown>;
-    return readMessage(axiosError.response?.data) ?? axiosError.message;
+    return readApiMessage(axiosError.response?.data) ?? axiosError.message;
   }
 
   if (error instanceof Error) return error.message;
@@ -99,14 +74,16 @@ function getErrorMessage(error: unknown) {
 
 export async function login(payload: LoginPayload) {
   const response = await http.post(buildApiUrl(loginPath), payload);
-  persistAuthSession(response.data);
-  return response.data;
+  const data = unwrapApiResponse<AuthResponse>(response.data);
+  persistAuthSession(data);
+  return data;
 }
 
 export async function register(payload: RegisterPayload) {
   const response = await http.post(buildApiUrl(registerPath), payload);
-  persistAuthSession(response.data);
-  return response.data;
+  const data = unwrapApiResponse<AuthResponse>(response.data);
+  persistAuthSession(data);
+  return data;
 }
 
 export function startGoogleLogin() {

@@ -1,4 +1,4 @@
-import { api, unwrapData } from '../../../api/client';
+import { api, unwrapArrayData, unwrapData } from '../../../api/client';
 import type {
   CreateBudgetPayload,
   FinanceBudget,
@@ -7,7 +7,7 @@ import type {
 
 export async function getBudgets(month: number, year: number) {
   const response = await api.get('/finance/budgets', { params: { month, year } });
-  return unwrapData<FinanceBudget[]>(response.data);
+  return unwrapArrayData<FinanceBudget>(response.data);
 }
 
 export async function createBudget(payload: CreateBudgetPayload) {

@@ -16,7 +16,10 @@ export function CategoryList({ title, categories, onEdit, onDelete }: CategoryLi
     <div>
       <h3 className="font-display font-bold text-primary mb-3">{title}</h3>
       {!categories.length ? (
-        <EmptyState title="Chưa có danh mục" />
+        <EmptyState
+          title="Chưa có danh mục"
+          description="Tạo danh mục để bắt đầu phân loại thu nhập và chi tiêu."
+        />
       ) : (
         <div className="flex flex-col gap-2">
           {categories.map((cat) => (

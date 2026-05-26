@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Modal } from '../../../components/ui/Modal';
 import { Input } from '../../../components/ui/Input';
 import { Button } from '../../../components/ui/Button';
+import { EmptyState } from './FinanceState';
 import type {
   CreateTransactionPayload,
   FinanceCategory,
@@ -15,6 +16,7 @@ interface TransactionFormProps {
   categories: FinanceCategory[];
   initial?: FinanceTransaction | null;
   loading?: boolean;
+  onCreateCategory?: () => void;
   onClose: () => void;
   onSubmit: (payload: CreateTransactionPayload, pendingFiles: File[]) => void;
 }
@@ -40,6 +42,7 @@ export function TransactionForm({
   categories,
   initial,
   loading,
+  onCreateCategory,
   onClose,
   onSubmit,
 }: TransactionFormProps) {
@@ -82,6 +85,7 @@ export function TransactionForm({
   }, [open, initial]);
 
   const filteredCategories = categories.filter((c) => c.type === form.type);
+  const canCreateCategory = Boolean(onCreateCategory);
 
   const validate = () => {
     const next: FormErrors = {};
@@ -182,6 +186,29 @@ export function TransactionForm({
           {errors.categoryId && (
             <span className="font-mono text-label text-red-500">{errors.categoryId}</span>
           )}
+          {!filteredCategories.length && (
+            <div className="pt-2">
+              <EmptyState
+                title={
+                  categories.length
+                    ? `Chưa có danh mục ${form.type === 'INCOME' ? 'thu nhập' : 'chi tiêu'}`
+                    : 'Bạn chưa có danh mục nào'
+                }
+                description={
+                  categories.length
+                    ? 'Hãy tạo danh mục phù hợp trước khi thêm giao dịch.'
+                    : 'Tạo danh mục đầu tiên để mở khóa luồng thêm giao dịch.'
+                }
+                action={
+                  canCreateCategory ? (
+                    <Button className="mt-2" variant="secondary" onClick={onCreateCategory}>
+                      Thêm danh mục
+                    </Button>
+                  ) : undefined
+                }
+              />
+            </div>
+          )}
         </div>
 
         <Input
@@ -211,6 +238,9 @@ export function TransactionForm({
             onChange={handleFileChange}
             className="text-sm font-body text-primary/60"
           />
+          <p className="text-xs font-body text-primary/45">
+            Ảnh sẽ được tải lên cloud sau khi bạn lưu giao dịch.
+          </p>
           {previews.length > 0 && (
             <div className="flex flex-wrap gap-2 mt-2">
               {previews.map((src) => (

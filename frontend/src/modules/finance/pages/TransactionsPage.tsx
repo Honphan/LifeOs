@@ -10,14 +10,17 @@ import { TransactionTable } from '../components/TransactionTable';
 import { TransactionCardList } from '../components/TransactionCardList';
 import { TransactionForm } from '../components/TransactionForm';
 import { TransactionDetailDrawer } from '../components/TransactionDetailDrawer';
+import { CategoryForm } from '../components/CategoryForm';
 import { EmptyState, ErrorState, LoadingState } from '../components/FinanceState';
 import { useToast } from '../components/Toast';
 import type {
+  CreateCategoryPayload,
   CreateTransactionPayload,
   FinanceCategory,
   FinanceTransaction,
   TransactionFilterParams,
 } from '../types/finance.types';
+import { createCategory } from '../api/categoryApi';
 
 export function TransactionsPage() {
   const { showToast } = useToast();
@@ -32,7 +35,9 @@ export function TransactionsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [formOpen, setFormOpen] = useState(false);
+  const [categoryFormOpen, setCategoryFormOpen] = useState(false);
   const [editing, setEditing] = useState<FinanceTransaction | null>(null);
+  const [categorySaving, setCategorySaving] = useState(false);
   const [saving, setSaving] = useState(false);
   const [detail, setDetail] = useState<FinanceTransaction | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<FinanceTransaction | null>(null);
@@ -72,16 +77,17 @@ export function TransactionsPage() {
   const handleSubmit = async (payload: CreateTransactionPayload, files: File[]) => {
     setSaving(true);
     try {
-      if (editing) {
-        await updateTransaction(editing.id, payload);
-        showToast('Cập nhật giao dịch thành công');
-      } else {
-        const created = await createTransaction(payload);
+      const transaction = editing
+        ? await updateTransaction(editing.id, payload)
+        : await createTransaction(payload);
+
+      if (files.length > 0) {
         for (const file of files) {
-          await uploadTransactionAttachment(created.id, file);
+          await uploadTransactionAttachment(transaction.id, file);
         }
-        showToast('Thêm giao dịch thành công');
       }
+
+      showToast(editing ? 'Cập nhật giao dịch thành công' : 'Thêm giao dịch thành công');
       setFormOpen(false);
       setEditing(null);
       await loadTransactions();
@@ -89,6 +95,21 @@ export function TransactionsPage() {
       showToast(getApiErrorMessage(err), 'error');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleCategorySubmit = async (payload: CreateCategoryPayload) => {
+    setCategorySaving(true);
+    try {
+      await createCategory(payload);
+      showToast('Thêm danh mục thành công');
+      setCategoryFormOpen(false);
+      await loadCategories();
+      await loadTransactions();
+    } catch (err) {
+      showToast(getApiErrorMessage(err), 'error');
+    } finally {
+      setCategorySaving(false);
     }
   };
 
@@ -112,10 +133,16 @@ export function TransactionsPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-body text-primary/50 font-body">Quản lý giao dịch thu/chi</p>
-        <Button onClick={() => { setEditing(null); setFormOpen(true); }}>
-          <Plus size={16} />
-          Thêm giao dịch
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="secondary" onClick={() => setCategoryFormOpen(true)}>
+            <Plus size={16} />
+            Thêm danh mục
+          </Button>
+          <Button onClick={() => { setEditing(null); setFormOpen(true); }}>
+            <Plus size={16} />
+            Thêm giao dịch
+          </Button>
+        </div>
       </div>
 
       <TransactionFilterBar filters={filters} categories={categories} onChange={setFilters} />
@@ -127,12 +154,22 @@ export function TransactionsPage() {
       ) : !transactions.length ? (
         <EmptyState
           title="Bạn chưa có giao dịch nào"
-          description="Hãy thêm giao dịch đầu tiên."
+          description={
+            categories.length
+              ? 'Hãy thêm giao dịch đầu tiên để bắt đầu theo dõi tài chính.'
+              : 'Bạn cần tạo danh mục trước, rồi mới thêm giao dịch.'
+          }
           action={
-            <Button className="mt-2" onClick={() => setFormOpen(true)}>
-              <Plus size={16} />
-              Thêm giao dịch
-            </Button>
+            <div className="mt-2 flex flex-wrap justify-center gap-2">
+              <Button variant="secondary" onClick={() => setCategoryFormOpen(true)}>
+                <Plus size={16} />
+                Thêm danh mục
+              </Button>
+              <Button onClick={() => setFormOpen(true)}>
+                <Plus size={16} />
+                Thêm giao dịch
+              </Button>
+            </div>
           }
         />
       ) : (
@@ -181,8 +218,16 @@ export function TransactionsPage() {
         categories={categories}
         initial={editing}
         loading={saving}
+        onCreateCategory={() => setCategoryFormOpen(true)}
         onClose={() => { setFormOpen(false); setEditing(null); }}
         onSubmit={handleSubmit}
+      />
+
+      <CategoryForm
+        open={categoryFormOpen}
+        loading={categorySaving}
+        onClose={() => setCategoryFormOpen(false)}
+        onSubmit={handleCategorySubmit}
       />
 
       <TransactionDetailDrawer

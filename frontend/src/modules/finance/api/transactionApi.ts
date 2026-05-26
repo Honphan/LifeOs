@@ -19,7 +19,13 @@ export async function getTransactions(params: TransactionFilterParams = {}) {
       size: data.length,
     } satisfies PaginatedResponse<FinanceTransaction>;
   }
-  return data;
+  return {
+    content: Array.isArray(data.content) ? data.content : [],
+    totalElements: data.totalElements ?? 0,
+    totalPages: data.totalPages ?? 0,
+    number: data.number ?? 0,
+    size: data.size ?? 0,
+  } satisfies PaginatedResponse<FinanceTransaction>;
 }
 
 export async function getTransactionDetail(id: number) {

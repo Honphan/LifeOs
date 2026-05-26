@@ -37,7 +37,7 @@ export function TransactionDetailDrawer({
   if (!open || !transaction) return null;
 
   const resolveAttachmentUrl = (attachment: NonNullable<FinanceTransaction['attachments']>[number]) =>
-    attachment.imageUrl ?? attachment.fileUrl ?? '';
+    attachment.imageUrl ?? '';
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
@@ -70,15 +70,29 @@ export function TransactionDetailDrawer({
 
           {(transaction.attachments?.length ?? 0) > 0 && (
             <div>
-              <p className="font-mono text-label uppercase tracking-widest text-secondary mb-2">Ảnh hóa đơn</p>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="flex items-center justify-between gap-3 mb-2">
+                <p className="font-mono text-label uppercase tracking-widest text-secondary">Ảnh hóa đơn</p>
+                <span className="inline-flex items-center rounded-full bg-tertiary/10 px-2.5 py-1 text-[11px] font-mono uppercase tracking-widest text-tertiary">
+                  Cloud
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
                 {transaction.attachments!.map((att) => (
-                  <a key={att.id} href={resolveAttachmentUrl(att)} target="_blank" rel="noreferrer">
+                  <a
+                    key={att.id}
+                    href={resolveAttachmentUrl(att)}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="group rounded-lg border border-primary/10 overflow-hidden bg-primary/[0.02] hover:border-secondary/30 transition-base"
+                  >
                     <img
                       src={resolveAttachmentUrl(att)}
                       alt={att.fileName}
-                      className="w-full h-28 object-cover rounded-sm border border-primary/10"
+                      className="h-32 w-full object-cover group-hover:scale-[1.02] transition-transform"
                     />
+                    <div className="p-2">
+                      <p className="text-xs font-body text-primary/70 truncate">{att.fileName}</p>
+                    </div>
                   </a>
                 ))}
               </div>

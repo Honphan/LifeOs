@@ -1,4 +1,4 @@
-import { api, unwrapData } from '../../../api/client';
+import { api, unwrapArrayData, unwrapData } from '../../../api/client';
 import type {
   CreateCategoryPayload,
   FinanceCategory,
@@ -8,7 +8,7 @@ import type {
 
 export async function getCategories(type?: TransactionType) {
   const response = await api.get('/finance/categories', { params: { type } });
-  return unwrapData<FinanceCategory[]>(response.data);
+  return unwrapArrayData<FinanceCategory>(response.data);
 }
 
 export async function createCategory(payload: CreateCategoryPayload) {

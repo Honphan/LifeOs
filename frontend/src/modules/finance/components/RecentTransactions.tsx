@@ -27,7 +27,16 @@ export function RecentTransactions({ transactions }: RecentTransactionsProps) {
       {!transactions.length ? (
         <EmptyState
           title="Bạn chưa có giao dịch nào"
-          description="Hãy thêm giao dịch đầu tiên."
+          description="Thêm giao dịch đầu tiên để xem số liệu và biểu đồ bắt đầu có ý nghĩa."
+          action={
+            <Link
+              to="/finance/transactions"
+              className="mt-2 inline-flex items-center gap-1 rounded-md bg-tertiary px-4 py-2 text-sm font-body font-medium text-white transition-base hover:opacity-90"
+            >
+              Thêm giao dịch
+              <ArrowRight size={14} />
+            </Link>
+          }
         />
       ) : (
         <div className="divide-y divide-primary/5">

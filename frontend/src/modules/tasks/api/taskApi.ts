@@ -1,9 +1,9 @@
-import { api, unwrapData } from '../../../api/client';
+import { api, unwrapArrayData, unwrapData } from '../../../api/client';
 import type { TaskItem } from '../types/task.types';
 
 export async function getTasks() {
   const response = await api.get('/tasks');
-  return unwrapData<TaskItem[]>(response.data);
+  return unwrapArrayData<TaskItem>(response.data);
 }
 
 export async function createTask(title: string) {
