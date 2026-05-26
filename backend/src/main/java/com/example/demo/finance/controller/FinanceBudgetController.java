@@ -2,9 +2,9 @@ package com.example.demo.finance.controller;
 
 import com.example.demo.finance.dto.request.CreateBudgetRequest;
 import com.example.demo.finance.dto.request.UpdateBudgetRequest;
-import com.example.demo.finance.dto.response.BudgetResponse;
 import com.example.demo.finance.service.FinanceBudgetService;
 import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,24 +20,24 @@ public class FinanceBudgetController {
     }
 
     @GetMapping
-    public List<BudgetResponse> getBudgets(@RequestParam int month, @RequestParam int year) {
+    public ResponseEntity<?> getBudgets(@RequestParam int month, @RequestParam int year) {
         return budgetService.getBudgets(month, year);
     }
 
     @PostMapping
-    public BudgetResponse createBudget(@Valid @RequestBody CreateBudgetRequest request) {
+    public ResponseEntity<?> createBudget(@Valid @RequestBody CreateBudgetRequest request) {
         return budgetService.createBudget(request);
     }
 
     @PutMapping("/{id}")
-    public BudgetResponse updateBudget(
+    public ResponseEntity<?> updateBudget(
             @PathVariable Long id,
             @Valid @RequestBody UpdateBudgetRequest request) {
         return budgetService.updateBudget(id, request);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteBudget(@PathVariable Long id) {
-        budgetService.deleteBudget(id);
+    public ResponseEntity<?> deleteBudget(@PathVariable Long id) {
+        return budgetService.deleteBudget(id);
     }
 }

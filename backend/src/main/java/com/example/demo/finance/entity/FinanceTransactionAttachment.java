@@ -26,8 +26,11 @@ public class FinanceTransactionAttachment {
     @JoinColumn(name = "transaction_id", insertable = false, updatable = false)
     private FinanceTransaction transaction;
 
-    @Column(nullable = false, length = 500)
+    @Column(nullable = false, length = 1000)
     private String imageUrl;
+
+    @Column(name = "public_id", length = 255)
+    private String publicId;
 
     @Column(nullable = false, length = 255)
     private String fileName;

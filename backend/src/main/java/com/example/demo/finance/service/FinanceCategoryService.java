@@ -2,6 +2,7 @@ package com.example.demo.finance.service;
 
 import com.example.demo.finance.dto.request.CreateCategoryRequest;
 import com.example.demo.finance.dto.request.UpdateCategoryRequest;
+import com.example.demo.common.dto.ApiResponse;
 import com.example.demo.finance.dto.response.CategoryResponse;
 import com.example.demo.finance.entity.FinanceCategory;
 import com.example.demo.finance.entity.FinanceTransaction;
@@ -12,6 +13,7 @@ import com.example.demo.finance.repository.FinanceTransactionRepository;
 import com.example.demo.security.SecurityUtils;
 import com.example.demo.user.entity.User;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -38,17 +40,18 @@ public class FinanceCategoryService {
     }
 
     @Transactional(readOnly = true)
-    public List<CategoryResponse> getCategories(TransactionType type) {
+    public ResponseEntity<ApiResponse<List<CategoryResponse>>> getCategories(TransactionType type) {
         User user = securityUtils.requireCurrentUser();
         profileService.getOrCreateProfile();
         List<FinanceCategory> categories = type == null
                 ? categoryRepository.findByUserIdOrderByNameAsc(user.getId())
                 : categoryRepository.findByUserIdAndTypeOrderByNameAsc(user.getId(), type);
-        return categories.stream().map(FinanceMapper::toCategoryResponse).toList();
+        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách danh mục thành công",
+                categories.stream().map(FinanceMapper::toCategoryResponse).toList()));
     }
 
     @Transactional
-    public CategoryResponse createCategory(CreateCategoryRequest request) {
+    public ResponseEntity<ApiResponse<CategoryResponse>> createCategory(CreateCategoryRequest request) {
         User user = securityUtils.requireCurrentUser();
         profileService.getOrCreateProfile();
 
@@ -64,11 +67,12 @@ public class FinanceCategoryService {
         category.setIcon(request.icon());
         category.setColor(request.color());
         category.setDefault(false);
-        return FinanceMapper.toCategoryResponse(categoryRepository.save(category));
+        return ResponseEntity.ok(ApiResponse.success("Tạo danh mục thành công",
+                FinanceMapper.toCategoryResponse(categoryRepository.save(category))));
     }
 
     @Transactional
-    public CategoryResponse updateCategory(Long id, UpdateCategoryRequest request) {
+    public ResponseEntity<ApiResponse<CategoryResponse>> updateCategory(Long id, UpdateCategoryRequest request) {
         FinanceCategory category = requireOwnedCategory(id);
         if (request.name() != null && !request.name().isBlank()) {
             if (categoryRepository.existsByUserIdAndNameIgnoreCaseAndIdNot(
@@ -79,11 +83,12 @@ public class FinanceCategoryService {
         }
         if (request.icon() != null) category.setIcon(request.icon());
         if (request.color() != null) category.setColor(request.color());
-        return FinanceMapper.toCategoryResponse(categoryRepository.save(category));
+        return ResponseEntity.ok(ApiResponse.success("Cập nhật danh mục thành công",
+                FinanceMapper.toCategoryResponse(categoryRepository.save(category))));
     }
 
     @Transactional
-    public void deleteCategory(Long id) {
+    public ResponseEntity<ApiResponse<Void>> deleteCategory(Long id) {
         FinanceCategory category = requireOwnedCategory(id);
         if (category.isDefault()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Không thể xóa danh mục mặc định");
@@ -100,6 +105,7 @@ public class FinanceCategoryService {
         }
 
         categoryRepository.delete(category);
+        return ResponseEntity.ok(ApiResponse.success("Xóa danh mục thành công", null));
     }
 
     public FinanceCategory requireOwnedCategory(Long id) {

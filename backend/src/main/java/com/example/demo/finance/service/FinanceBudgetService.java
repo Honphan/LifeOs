@@ -2,6 +2,7 @@ package com.example.demo.finance.service;
 
 import com.example.demo.finance.dto.request.CreateBudgetRequest;
 import com.example.demo.finance.dto.request.UpdateBudgetRequest;
+import com.example.demo.common.dto.ApiResponse;
 import com.example.demo.finance.dto.response.BudgetResponse;
 import com.example.demo.finance.entity.FinanceBudget;
 import com.example.demo.finance.entity.FinanceCategory;
@@ -11,6 +12,7 @@ import com.example.demo.finance.repository.FinanceTransactionRepository;
 import com.example.demo.security.SecurityUtils;
 import com.example.demo.user.entity.User;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -44,17 +46,18 @@ public class FinanceBudgetService {
     }
 
     @Transactional(readOnly = true)
-    public List<BudgetResponse> getBudgets(int month, int year) {
+    public ResponseEntity<ApiResponse<List<BudgetResponse>>> getBudgets(int month, int year) {
         User user = securityUtils.requireCurrentUser();
         profileService.getOrCreateProfile();
-        return budgetRepository.findByUserIdAndMonthAndYearOrderByNameAsc(user.getId(), month, year)
-                .stream()
-                .map(budget -> toResponse(budget, user.getId()))
-                .toList();
+        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách ngân sách thành công",
+                budgetRepository.findByUserIdAndMonthAndYearOrderByNameAsc(user.getId(), month, year)
+                        .stream()
+                        .map(budget -> toResponse(budget, user.getId()))
+                        .toList()));
     }
 
     @Transactional
-    public BudgetResponse createBudget(CreateBudgetRequest request) {
+    public ResponseEntity<ApiResponse<BudgetResponse>> createBudget(CreateBudgetRequest request) {
         User user = securityUtils.requireCurrentUser();
         profileService.getOrCreateProfile();
         FinanceCategory category = categoryService.requireOwnedCategory(request.categoryId(), TransactionType.EXPENSE);
@@ -66,11 +69,12 @@ public class FinanceBudgetService {
         budget.setAmountLimit(request.amountLimit());
         budget.setMonth(request.month());
         budget.setYear(request.year());
-        return toResponse(budgetRepository.save(budget), user.getId());
+        return ResponseEntity.ok(ApiResponse.success("Tạo ngân sách thành công",
+                toResponse(budgetRepository.save(budget), user.getId())));
     }
 
     @Transactional
-    public BudgetResponse updateBudget(Long id, UpdateBudgetRequest request) {
+    public ResponseEntity<ApiResponse<BudgetResponse>> updateBudget(Long id, UpdateBudgetRequest request) {
         FinanceBudget budget = requireOwnedBudget(id);
         if (request.name() != null && !request.name().isBlank()) {
             budget.setName(request.name().trim());
@@ -88,12 +92,14 @@ public class FinanceBudgetService {
         if (request.year() != null) {
             budget.setYear(request.year());
         }
-        return toResponse(budgetRepository.save(budget), budget.getUserId());
+        return ResponseEntity.ok(ApiResponse.success("Cập nhật ngân sách thành công",
+                toResponse(budgetRepository.save(budget), budget.getUserId())));
     }
 
     @Transactional
-    public void deleteBudget(Long id) {
+    public ResponseEntity<ApiResponse<Void>> deleteBudget(Long id) {
         budgetRepository.delete(requireOwnedBudget(id));
+        return ResponseEntity.ok(ApiResponse.success("Xóa ngân sách thành công", null));
     }
 
     private FinanceBudget requireOwnedBudget(Long id) {

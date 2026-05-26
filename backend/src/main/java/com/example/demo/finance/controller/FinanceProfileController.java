@@ -1,9 +1,9 @@
 package com.example.demo.finance.controller;
 
 import com.example.demo.finance.dto.request.UpdateBalanceRequest;
-import com.example.demo.finance.dto.response.FinanceProfileResponse;
 import com.example.demo.finance.service.FinanceProfileService;
 import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -17,12 +17,12 @@ public class FinanceProfileController {
     }
 
     @GetMapping
-    public FinanceProfileResponse getProfile() {
+    public ResponseEntity<?> getProfile() {
         return profileService.getMyProfile();
     }
 
     @PutMapping("/balance")
-    public FinanceProfileResponse updateBalance(@Valid @RequestBody UpdateBalanceRequest request) {
+    public ResponseEntity<?> updateBalance(@Valid @RequestBody UpdateBalanceRequest request) {
         return profileService.updateBalance(request);
     }
 }

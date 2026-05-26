@@ -2,11 +2,10 @@ package com.example.demo.finance.controller;
 
 import com.example.demo.finance.dto.request.CreateTransactionRequest;
 import com.example.demo.finance.dto.request.UpdateTransactionRequest;
-import com.example.demo.finance.dto.response.AttachmentResponse;
-import com.example.demo.finance.dto.response.TransactionResponse;
 import com.example.demo.finance.enums.TransactionType;
 import com.example.demo.finance.service.FinanceTransactionService;
 import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -29,7 +28,7 @@ public class FinanceTransactionController {
     }
 
     @GetMapping
-    public Page<TransactionResponse> getTransactions(
+    public ResponseEntity<?> getTransactions(
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) TransactionType type,
             @RequestParam(required = false) Long categoryId,
@@ -42,34 +41,34 @@ public class FinanceTransactionController {
     }
 
     @GetMapping("/{id}")
-    public TransactionResponse getTransaction(@PathVariable Long id) {
+    public ResponseEntity<?> getTransaction(@PathVariable Long id) {
         return transactionService.getTransactionDetail(id);
     }
 
     @PostMapping
-    public TransactionResponse createTransaction(@Valid @RequestBody CreateTransactionRequest request) {
+    public ResponseEntity<?> createTransaction(@Valid @RequestBody CreateTransactionRequest request) {
         return transactionService.createTransaction(request);
     }
 
     @PutMapping("/{id}")
-    public TransactionResponse updateTransaction(
+    public ResponseEntity<?> updateTransaction(
             @PathVariable Long id,
             @Valid @RequestBody UpdateTransactionRequest request) {
         return transactionService.updateTransaction(id, request);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteTransaction(@PathVariable Long id) {
-        transactionService.deleteTransaction(id);
+    public ResponseEntity<?> deleteTransaction(@PathVariable Long id) {
+        return transactionService.deleteTransaction(id);
     }
 
     @PostMapping("/{id}/attachments")
-    public AttachmentResponse uploadAttachment(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
+    public ResponseEntity<?> uploadAttachment(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
         return transactionService.uploadAttachment(id, file);
     }
 
     @DeleteMapping("/{transactionId}/attachments/{attachmentId}")
-    public void deleteAttachment(@PathVariable Long transactionId, @PathVariable Long attachmentId) {
-        transactionService.deleteAttachment(transactionId, attachmentId);
+    public ResponseEntity<?> deleteAttachment(@PathVariable Long transactionId, @PathVariable Long attachmentId) {
+        return transactionService.deleteAttachment(transactionId, attachmentId);
     }
 }

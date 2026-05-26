@@ -1,13 +1,9 @@
 package com.example.demo.finance.controller;
 
-import com.example.demo.finance.dto.response.CategorySummaryResponse;
-import com.example.demo.finance.dto.response.FinanceSummaryResponse;
-import com.example.demo.finance.dto.response.MonthlyTrendResponse;
 import com.example.demo.finance.enums.TransactionType;
 import com.example.demo.finance.service.FinanceAnalyticsService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/finance")
@@ -20,14 +16,14 @@ public class FinanceAnalyticsController {
     }
 
     @GetMapping("/summary")
-    public FinanceSummaryResponse getSummary(
+    public ResponseEntity<?> getSummary(
             @RequestParam int month,
             @RequestParam int year) {
         return analyticsService.getSummary(month, year);
     }
 
     @GetMapping("/analytics/category-summary")
-    public List<CategorySummaryResponse> getCategorySummary(
+    public ResponseEntity<?> getCategorySummary(
             @RequestParam int month,
             @RequestParam int year,
             @RequestParam TransactionType type) {
@@ -35,7 +31,7 @@ public class FinanceAnalyticsController {
     }
 
     @GetMapping("/analytics/monthly-trend")
-    public List<MonthlyTrendResponse> getMonthlyTrend(@RequestParam int year) {
+    public ResponseEntity<?> getMonthlyTrend(@RequestParam int year) {
         return analyticsService.getMonthlyTrend(year);
     }
 }

@@ -5,12 +5,14 @@ import com.example.demo.finance.dto.response.FinanceProfileResponse;
 import com.example.demo.finance.entity.FinanceCategory;
 import com.example.demo.finance.entity.FinanceProfile;
 import com.example.demo.finance.enums.TransactionType;
+import com.example.demo.common.dto.ApiResponse;
 import com.example.demo.finance.mapper.FinanceMapper;
 import com.example.demo.finance.repository.FinanceCategoryRepository;
 import com.example.demo.finance.repository.FinanceProfileRepository;
 import com.example.demo.security.SecurityUtils;
 import com.example.demo.user.entity.User;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -54,18 +56,20 @@ public class FinanceProfileService {
     }
 
     @Transactional(readOnly = true)
-    public FinanceProfileResponse getMyProfile() {
-        return FinanceMapper.toProfileResponse(getOrCreateProfile());
+    public ResponseEntity<ApiResponse<FinanceProfileResponse>> getMyProfile() {
+        return ResponseEntity.ok(ApiResponse.success("Lấy hồ sơ tài chính thành công",
+                FinanceMapper.toProfileResponse(getOrCreateProfile())));
     }
 
     @Transactional
-    public FinanceProfileResponse updateBalance(UpdateBalanceRequest request) {
+    public ResponseEntity<ApiResponse<FinanceProfileResponse>> updateBalance(UpdateBalanceRequest request) {
         FinanceProfile profile = getOrCreateProfile();
         profile.setCurrentBalance(request.currentBalance());
         if (profile.getInitialBalance().compareTo(BigDecimal.ZERO) == 0) {
             profile.setInitialBalance(request.currentBalance());
         }
-        return FinanceMapper.toProfileResponse(profileRepository.save(profile));
+        return ResponseEntity.ok(ApiResponse.success("Cập nhật số dư thành công",
+                FinanceMapper.toProfileResponse(profileRepository.save(profile))));
     }
 
     @Transactional

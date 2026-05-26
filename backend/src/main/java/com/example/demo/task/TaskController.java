@@ -1,5 +1,6 @@
 package com.example.demo.task;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -14,12 +15,12 @@ public class TaskController {
     }
 
     @PostMapping
-    public TaskDto create(@RequestParam String title) {
+    public ResponseEntity<?> create(@RequestParam String title) {
         return taskService.createTask(title);
     }
 
     @GetMapping
-    public List<TaskDto> getAll() {
+    public ResponseEntity<?> getAll() {
         return taskService.getAllTasks();
     }
 }
